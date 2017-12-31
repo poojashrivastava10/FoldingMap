@@ -1,0 +1,139 @@
+package module6;
+
+import java.util.List;
+
+import de.fhpotsdam.unfolding.data.Feature;
+import de.fhpotsdam.unfolding.data.PointFeature;
+import de.fhpotsdam.unfolding.geo.Location;
+import de.fhpotsdam.unfolding.marker.Marker;
+import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PGraphics;
+import processing.core.PImage;
+
+/** Implements a visual marker for cities on an earthquake map
+ * 
+ * @author UC San Diego Intermediate Software Development MOOC team
+ * 
+ */
+public class CityMarker extends CommonMarker {
+	
+	public static int TRI_SIZE = 5;  // The size of the triangle marker
+	PImage img;
+
+	
+	public CityMarker(Location location) {
+		super(location);
+	}
+	
+	public void loadImage (PImage img)
+	{
+		this.img = img;
+	}
+	
+	
+	public CityMarker(Feature city) {
+		super(((PointFeature)city).getLocation(), city.getProperties());
+		// Cities have properties: "name" (city name), "country" (country name)
+		// and "population" (population, in millions)
+	}
+	
+	
+	// pg is the graphics object on which you call the graphics
+	// methods.  e.g. pg.fill(255, 0, 0) will set the color to red
+	// x and y are the center of the object to draw. 
+	// They will be used to calculate the coordinates to pass
+	// into any shape drawing methods.  
+	// e.g. pg.rect(x, y, 10, 10) will draw a 10x10 square
+	// whose upper left corner is at position x, y
+	/**
+	 * Implementation of method to draw marker on the map.
+	 */
+	public void drawMarker(PGraphics pg, float x, float y) {
+		//System.out.println("Drawing a city");
+		// Save previous drawing style
+		//pg.pushStyle();
+		
+		
+		MyImage myImg = new MyImage(location,img);
+		myImg.draw(pg, x, y);
+		
+		//pg.imageMode(PConstants.CORNER);
+		// The image is drawn in object coordinates, i.e. the marker's origin (0,0) is at its geo-location.
+		//pg.image(img, x - 11, y - 37);
+
+		
+		// IMPLEMENT: drawing triangle for each city
+		//pg.fill(150, 30, 30);
+		//pg.triangle(x, y-TRI_SIZE, x-TRI_SIZE, y+TRI_SIZE, x+TRI_SIZE, y+TRI_SIZE);
+		
+		// Restore previous drawing style
+		//pg.popStyle();
+	}
+	
+	/** Show the title of the city if this marker is selected */
+	public void showTitle(PGraphics pg, float x, float y)
+	{
+		String name = getCity() + " " + getCountry() + " ";
+		String pop = "Pop: " + getPopulation() + " Million";
+		String count = "number of nearby earthquakes: " + countQuakesInThreatCr();
+		
+		pg.pushStyle();
+		
+		pg.fill(255, 255, 255);
+		pg.textSize(12);
+		pg.rectMode(PConstants.CORNER);
+		pg.rect(x, y-TRI_SIZE-39, Math.max(pg.textWidth(name), pg.textWidth(pop)) + 6, 39);
+		pg.fill(0, 0, 0);
+		pg.textAlign(PConstants.LEFT, PConstants.TOP);
+		pg.text(name, x+3, y-TRI_SIZE-33);
+		pg.text(pop, x+3, y - TRI_SIZE -18);
+		
+		pg.fill(255, 255, 255);
+		pg.textSize(12);
+		pg.rectMode(PConstants.CORNER);
+		pg.rect(x, y-TRI_SIZE+11, Math.max(pg.textWidth(count), pg.textWidth(count)) + 6, 20);
+		pg.fill(0, 0, 0);
+		pg.textAlign(PConstants.LEFT, PConstants.TOP);
+		pg.text(count, x+3, y-TRI_SIZE+12);
+
+
+		
+		pg.popStyle();
+	}
+
+	
+	public int countQuakesInThreatCr()
+	{
+		EarthquakeCityMap quakeMap;
+		quakeMap = new EarthquakeCityMap();
+		List<Marker> myList = quakeMap.getList();
+		int count=0;
+		for (Marker quake:myList)
+		{
+			EarthquakeMarker quakeMarker = (EarthquakeMarker)quake;
+			if (quakeMarker.getDistanceTo(quake.getLocation()) < quakeMarker.myThreatCircle())
+			{
+				count += 1;
+			}
+		}
+		return count;
+	}
+	
+	
+	
+	private String getCity()
+	{
+		return getStringProperty("name");
+	}
+	
+	private String getCountry()
+	{
+		return getStringProperty("country");
+	}
+	
+	private float getPopulation()
+	{
+		return Float.parseFloat(getStringProperty("population"));
+	}
+}
