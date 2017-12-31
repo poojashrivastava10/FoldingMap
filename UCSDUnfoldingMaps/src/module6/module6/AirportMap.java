@@ -31,7 +31,7 @@ public class AirportMap extends PApplet {
 		// setting up PAppler
 		size(800,600, OPENGL);
 		
-		// setting up map and default events
+		// set up map and default events
 		map = new UnfoldingMap(this, 50, 50, 750, 550);
 		MapUtils.createDefaultEventDispatcher(this, map);
 		
